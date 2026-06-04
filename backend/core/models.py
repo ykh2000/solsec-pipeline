@@ -41,6 +41,7 @@ class Finding(BaseModel):
     line_number: List[int]
     # Raw output in case we need extra tool-specific data later
     raw_tool_output: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional context or tool-specific data")
 
 
 """
@@ -56,3 +57,5 @@ class FindingSet(BaseModel):
         default_factory=dict,
         description="Optional metadata such as scan duration, tool versions, or environment details"
     )
+    
+    

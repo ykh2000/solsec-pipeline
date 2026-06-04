@@ -31,13 +31,20 @@ class SlitherAnalyzer(BaseAnalyzer):
         detectors = raw_data.get("results", {}).get("detectors", [])
         
         for d in detectors:
+            # Extract line numbers from all elements
+            lines = set()
+            for element in d.get("elements", []):
+                source_mapping = element.get("source_mapping", {})
+                element_lines = source_mapping.get("lines", [])
+                lines.update(element_lines)
+            
             finding = Finding(
                 title=d.get("check"),
                 description=d.get("description"),
                 severity=self._map_severity(d.get("impact")),
                 tool="Slither",
                 file_path=self.target_path,
-                line_number=d.get("line_numbers", []),
+                line_number=sorted(list(lines)),
                 raw_tool_output=d
             )
             findings.append(finding)

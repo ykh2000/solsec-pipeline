@@ -15,6 +15,23 @@ class Processor:
         Severity.OPTIMIZATION: 1
     }
 
+    # Map different tool names to a unified title for better deduplication
+    VULNERABILITY_ALIASES = {
+        "reentrancy-eth": "Reentrancy",
+        "state access after external call": "Reentrancy",
+        "external call to user-supplied address": "Unprotected External Call",
+        "low-level-calls": "Low Level Call Usage",
+        "solc-version": "Outdated Solc Version",
+        "naming-convention": "Naming Convention Violation",
+        "func-visibility": "Missing Function Visibility"
+    }
+
+    def _normalize_title(self, title: str) -> str:
+        """
+        Returns a unified title if an alias exists, otherwise returns original.
+        """
+        return self.VULNERABILITY_ALIASES.get(title.lower(), title)
+
     def process_results(self, target_file: str, finding_sets: List[FindingSet]) -> FindingSet:
         """
         Takes multiple FindingSets and returns a single, deduplicated, and scored FindingSet.
@@ -42,15 +59,16 @@ class Processor:
     def _deduplicate(self, findings: List[Finding]) -> List[Finding]:
         """
         Merges findings that are likely the same issue.
-        Criteria: Same file, similar title, and overlapping line numbers.
+        Criteria: Same file, similar title (normalized), and overlapping line numbers.
         """
         processed_findings: List[Finding] = []
         
         for f in findings:
+            normalized_title = self._normalize_title(f.title)
             found_match = False
             for existing in processed_findings:
-                # Check if it's the same file and same vulnerability type
-                if f.file_path == existing.file_path and f.title.lower() == existing.title.lower():
+                # Check if it's the same file and same vulnerability type (using normalized titles)
+                if f.file_path == existing.file_path and normalized_title == self._normalize_title(existing.title):
                     # Check for line number overlap
                     f_lines = set(f.line_number)
                     ex_lines = set(existing.line_number)
@@ -59,10 +77,13 @@ class Processor:
                     if f_lines.intersection(ex_lines) or (not f_lines and not ex_lines):
                         found_match = True
                         self._merge_findings(existing, f)
+                        # Ensure the title remains the normalized one
+                        existing.title = normalized_title
                         break
             
             if not found_match:
                 new_finding = f.model_copy()
+                new_finding.title = normalized_title # Use the unified title
                 if not new_finding.metadata:
                     new_finding.metadata = {}
                 new_finding.metadata["tools"] = [f.tool]
@@ -107,3 +128,9 @@ class Processor:
                 f.metadata = {}
             f.metadata["security_score"] = score
         return findings
+
+
+
+
+
+

@@ -25,7 +25,7 @@ class Severity (str,Enum):
 # PASSPORT of a Bug
 # If the tool tries to send a file without a file_path, it will throw an error.
 
-
+ 
 class Finding(BaseModel):
     """
     Common format for security Discovery.

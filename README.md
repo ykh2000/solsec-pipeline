@@ -125,14 +125,47 @@ streamlit run frontend/app.py
 We use `pytest` for unit and integration testing.
 
 ### 1. Run the Automated Test Suite
-Ensure the virtual environment is active, then execute:
+Ensure your virtual environment is active:
+```bash
+source .venv/bin/activate
+```
+
+#### Run All Tests
+To run all tests in the project:
 ```bash
 pytest
 ```
-This runs the full test suite in the `tests/` directory:
+
+#### Run a Specific Test File
+To run only a specific test suite file:
+```bash
+pytest tests/test_processor.py
+```
+
+#### Run with Verbose Output (`-v`)
+To print the status and names of each test case individually:
+```bash
+pytest -v
+```
+
+#### Prevent Stdout Capture (`-s`)
+If you want to view test logging or `print()` statements in real-time as they run:
+```bash
+pytest -s
+```
+
+#### Run a Specific Test Case By Name (`-k`)
+To target only a specific test function matching a pattern:
+```bash
+pytest -k "test_scoring"
+```
+
+#### Summary of Test Suites
 - [tests/test_api.py](file:///Users/yashkhanduja/Documents/solsec-pipeline/tests/test_api.py): Validates API endpoints, input validation, and successful analysis responses.
 - [tests/test_orchestrator.py](file:///Users/yashkhanduja/Documents/solsec-pipeline/tests/test_orchestrator.py): Validates backend plugin discovery and multi-tool execution.
 - [tests/test_processor.py](file:///Users/yashkhanduja/Documents/solsec-pipeline/tests/test_processor.py): Verifies find deduplication, severity promotions, and scoring logic.
+
+---
 
 ### 2. Run the Unified Test Script
 There is a standalone pipeline execution test script. You can run it directly:
